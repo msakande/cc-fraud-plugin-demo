@@ -1,0 +1,179 @@
+/* This file is the descriptor for the Custom Python Prediction algorithm cc-fraud-advanced-plugin_AdaBoostRegressor */
+{
+    "meta" : {
+        // label: name of the algorithm as displayed, should be short
+        "label": "AdaBoostRegressor",
+
+        // description: longer string to help end users understand what this algorithm is. Will be displayed in the algorithm page
+        "description": "Plugin Algorithm that implements the Scikit-Learn AdaBoostRegressor, with DecisionTreeRegressor and LighGBM Regressor as the base estimators.",
+
+        // icon: must be one of the FontAwesome 3.2.1 icons, complete list here at https://fontawesome.com/v3.2.1/icons/
+        "icon": "icon-code"
+    },
+    
+    // List of types of prediction for which the algorithm will be available.
+    // Possibles values are: ["BINARY_CLASSIFICATION", "MULTICLASS", "REGRESSION"]
+    "predictionTypes": ["REGRESSION"],
+
+    // Depending on the mode you select, DSS will handle or not the building of the grid from the params
+    // Possible values are ["NONE", "MANAGED", "CUSTOM"]
+    "gridSearchMode": "MANAGED",
+
+    // Whether the model supports or not sample weights for training. 
+    // If yes, the clf from `algo.py` must have a `fit(X, y, sample_weights=None)` method
+    // If not, sample weights are not applied on this algorithm, but if they are selected
+    // for training, they will be applied on scoring metrics and charts.
+    "supportsSampleWeights": true,
+
+    // Whether the model supports sparse matrice for fitting and predicting, 
+    // i.e. if the `clf` provided in `algo.py` accepts a sparse matrix as argument
+    // for its `fit` and `predict` methods
+    "acceptsSparseMatrix": false,
+
+    /* params:
+    DSS will generate a formular from this list of requested parameters.
+    Your component code can then access the value provided by users using the "name" field of each parameter.
+
+    Available parameter types include:
+    STRING, INT, DOUBLE, BOOLEAN, DATE, SELECT, TEXTAREA, PRESET and others.
+
+    Besides, if the parameters are to be used to build the grid search, you must add a `gridParam` field and set it to true.
+
+    For the full list and for more details, see the documentation: https://doc.dataiku.com/dss/latest/plugins/reference/params.html
+
+    Below is an example of parameters for an AdaBoost regressor from scikit learn.
+    */
+    "params": [
+        
+        // Params for AdaBoost
+        {
+            "name": "n_estimators",
+            "label": "Num estimators",
+            "description": "The maximum number of estimators at which boosting is terminated. In case of perfect fit, the learning procedure is stopped early.",
+            "type": "DOUBLES",
+            "defaultValue": [50, 100],
+            "allowDuplicates": false,
+            "gridParam": true
+        },
+        {
+            "name": "learning_rate",
+            "label": "Learning rate",
+            "description":"Lower values slow down convergence and can make the model more robust.",
+            "type": "DOUBLES",
+            "defaultValue": [1.0],
+            "allowDuplicates": false,
+            "gridParam": true
+        },
+        {
+            "name": "loss",
+            "label": "Loss",
+            "description": "Type of loss used.",
+            "type": "MULTISELECT",
+            "defaultValue": ["linear"],
+            "selectChoices": [
+                {
+                    "value":"linear",
+                    "label":"linear"
+                },
+                {
+                    "value":"square",
+                    "label":"square"
+                },
+                {
+                    "value":"exponential",
+                    "label": "exponential"
+                }
+            ],
+            "gridParam": true
+        },
+        
+        // Params for the Base Estimator
+        {
+            "name": "base_estimator",
+            "label": "Base Estimator",
+            "description": "The base estimator class.",
+            "type": "SELECT",
+            "defaultValue": "decisiontree",
+            "selectChoices": [
+                {
+                    "label":"Decision Tree Regressor",
+                    "value":"decisiontree"
+                },
+                {
+                    "label":"LightGBM Regressor",
+                    "value":"lightgbm"
+                }
+            ],
+            "gridParam": false
+        },
+        
+        // Params if the Base Estimator is a Decision Tree Regressor
+        {
+            "name": "max_depth_tree",
+            "label": "Max depth",
+            "description": "The maximum depth of the tree.",
+            "type": "INT",
+            "defaultValue": 3,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'decisiontree'"
+        },
+        {        
+            "name": "min_samples_split_tree",
+            "label": "Min samples split",
+            "description": "The minimum number of samples required to split an internal node.",
+            "type": "INT",
+            "defaultValue": 2,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'decisiontree'"
+        },
+        {
+            "name": "min_samples_leaf_tree",
+            "label": "Min samples leaf",
+            "description": "The minimum number of samples required to be at a leaf node.",
+            "type": "INT",
+            "defaultValue": 1,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'decisiontree'"
+        },        
+        
+        // Params if the Base Estimator is a LightGBM Regressor
+        {
+            "name": "max_depth_gbm",
+            "label": "Max depth",
+            "description": "Maximum tree depth for base learners, <=0 means no limit.",
+            "type": "INT",
+            "defaultValue": -1,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'lightgbm'"
+        },
+        {
+            "name": "n_estimators_gbm",
+            "label": "Num estimators",
+            "description": "Number of boosted trees to fit.",
+            "type": "INT",
+            "defaultValue": 100,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'lightgbm'"
+        },
+        {
+            "name": "min_child_samples_gbm",
+            "label": "Min child samples",
+            "description": "Minimum number of data needed in a child (leaf).",
+            "type": "INT",
+            "defaultValue": 20,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'lightgbm'"
+        },
+        {
+            "name": "learning_rate_gbm",
+            "label": "Learning rate",
+            "description": "Boosting learning rate.",
+            "type": "DOUBLE",
+            "defaultValue": 0.1,
+            "gridParam": false,
+            "visibilityCondition":"model.base_estimator == 'lightgbm'"
+        }
+    ]
+}
+
+
